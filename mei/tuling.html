@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>梅</title>
+    <script src="./js/myAjax.js"></script>
+</head>
+<style>
+    *{
+        padding: 0;
+        margin: 0;
+    }
+    .imgLayout{
+        background-image: url(img/bg1.jpg);
+		background-size: cover;
+    }
+    .outer{
+		/*聊天框*/
+        box-sizing: border-box;
+        width: 600px;
+        height: 600px;
+        border-radius: 20px;
+        background-color: whitesmoke;
+        border: 2px solid white;
+        margin: 20px auto;
+        padding: 5px;
+    }
+    .chatContent{
+        box-sizing: border-box;
+        width: 100%;
+        height: 480px;
+        overflow: auto;
+        margin-bottom: 10px;
+    }
+    .outer input{
+        width: 400px;
+        height: 45px;
+        font-size: 30px;
+        line-height: 45px;
+    }
+    .outer button{
+        width: 160px;
+        height: 45px;
+        font-size: 30px;
+        line-height: 45px;
+        background-color: cornflowerblue;
+        border-radius: 20px;
+        outline: cornflowerblue;
+    }
+    .outer .chatContent div{
+        width: 500px;
+        display: none;
+    }
+    .outer .chatContent .msg_mine{
+        text-align: right;
+        float: right;
+        margin-right: 5px;
+    }
+    .outer .chatContent .msg_robot{
+        clear: both;
+    }
+    .chatContent img{
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+	
+</style>
+<body>
+<div class="imgLayout">
+    <div class="outer">
+    <div class="chatContent">
+    <div class="msg_robot">
+        <img src="img/mei.jpg" alt="robot">
+        <p></p>
+    </div>
+    <div class="msg_mine">
+        <img src="img/i.jpg" alt="robot">
+        <p></p>
+ 
+    </div>
+    </div>
+    <input type="text">
+    <button class="send_btn">发送</button>
+    </div>
+</div>
+ 
+<script>
+    var input = document.querySelector(".outer input");
+    var send = document.querySelector(".send_btn");
+    var msg_robot = document.querySelector(".outer .chatContent .msg_robot");
+    var msg_mine = document.querySelector(".outer .chatContent .msg_mine");
+    var chatContent = document.querySelector(".chatContent");
+ 
+    /*机器人聊天函数
+    * */
+    function chat() {
+        var sayContent = input.value;
+        var paras = "key=ee4f9dd94ef74d5a8fc196a269a49a15&userid=mei&info="+sayContent;
+        ajax.post("http://www.tuling123.com/openapi/api",paras,function (content,xhr) {
+            var newNodeMine=msg_mine.cloneNode(true);
+            newNodeMine.lastElementChild.innerHTML=sayContent;
+            newNodeMine.style.display="block";
+            chatContent.appendChild(newNodeMine);
+            //设置自动滚动文本聊天信息
+            autoScroll(chatContent);
+            //清空input栏的值
+            input.value="";
+            console.log(content);
+            //转化成js对象
+            var obj = JSON.parse(content);
+            //判断响应回复的信息是哪种类型
+            msgRobot = obj.text;
+            //判断图片信息
+            if(obj.url){
+                msgRobot += "<a href='"+obj.url+"' target='_blank'>点我看图片.</a>";
+            }
+ 
+            //判断菜谱信息
+            if(obj.list && obj.code=="308000"){
+                msgRobot +=" ①菜谱名字："+obj.list[0].name+" ②菜谱原料："+obj.list[0].info+" 做饭链接："+"<a href='"+obj.list[0].detailurl+"' target='_blank'>点我看怎么做？</a>";
+            }
+ 
+            //判断新闻信息
+            if(obj.list && obj.code=="302000"){
+                msgRobot +=" ①文章标题："+obj.list[0].article+" ②文章来源："+obj.list[0].source+" 做饭链接："+"<a href='"+obj.list[0].detailurl+"' target='_blank'>点我看新闻.</a>";
+            }
+            var newNodeRobot=msg_robot.cloneNode(true);
+            newNodeRobot.lastElementChild.innerHTML=msgRobot;
+            newNodeRobot.style.display="block";
+            chatContent.appendChild(newNodeRobot);
+            //设置自动滚动文本聊天信息
+            autoScroll(chatContent);
+        });
+    }
+ 
+ 
+    function autoScroll(parentEle) {
+        setTimeout(function step() {
+            
+            var top = parentEle.scrollTop;
+            parentEle.scrollTop += top +4;
+            if(top == parentEle.scrollTop) return;
+            setTimeout(step,20);
+        },0)
+    }
+ 
+    send.onclick = chat;
+ 
+    document.οnkeydοwn=function (ev) {
+        if(ev.keyCode == 13){
+            chat();
+        }
+    }
+ 
+ 
+</script>
+</body>
+</html>
